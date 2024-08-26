@@ -1,0 +1,253 @@
+import create from 'zustand';
+
+const useStore = create((set) => ({
+  cells: Array(1000).fill(""),
+  updateCell: (index, value) => set((state) => {
+    const newCells = [...state.cells];
+    newCells[index] = value;
+    return { cells: newCells };
+  }),
+}));
+
+export default useStore;
+// tailwind.config.js
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+// store/useSpreadsheetStore.js
+import create from 'zustand';
+
+const useSpreadsheetStore = create((set) => ({
+  cells: Array(1000).fill(''),
+  updateCell: (index, value) =>
+    set((state) => {
+      const newCells = [...state.cells];
+      newCells[index] = value;
+      return { cells: newCells };
+    }),
+}));
+
+export default useSpreadsheetStore;
+// components/Grid.js
+import React from 'react';
+import useSpreadsheetStore from '../store/useSpreadsheetStore';
+
+const Grid = () => {
+  const { cells, updateCell } = useSpreadsheetStore();
+
+  return (
+    <div className="grid grid-cols-10 gap-1 p-2">
+      {cells.map((cell, index) => (
+        <div key={index} className="border p-2">
+          <input
+            type="text"
+            value={cell}
+            onChange={(e) => updateCell(index, e.target.value)}
+            className="w-full"
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Grid;
+// pages/index.js
+import Head from 'next/head';
+import Grid from '../components/Grid';
+
+export default function Home() {
+  return (
+    <div>
+      <Head>
+        <title>Spreadsheet App</title>
+        <meta name="description" content="A simple spreadsheet app using Next.js and Tailwind CSS" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <main className="flex flex-col items-center justify-center min-h-screen p-4">
+        <h1 className="text-4xl font-bold mb-4">Spreadsheet App</h1>
+        <Grid />
+      </main>
+    </div>
+  );
+}
+// components/Grid.js
+import React from 'react';
+import useSpreadsheetStore from '../store/useSpreadsheetStore';
+
+const Grid = () => {
+  const { cells, updateCell } = useSpreadsheetStore();
+
+  return (
+    <div className="grid grid-cols-10 gap-1 p-2 border border-gray-300">
+      {cells.map((cell, index) => (
+        <div key={index} className="border border-gray-400 p-2">
+          <input
+            type="text"
+            value={cell}
+            onChange={(e) => updateCell(index, e.target.value)}
+            className="w-full outline-none"
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Grid;
+// components/Toolbar.js
+import React from 'react';
+import useSpreadsheetStore from '../store/useSpreadsheetStore';
+
+const Toolbar = () => {
+  const { formatCells } = useSpreadsheetStore();
+
+  return (
+    <div className="flex justify-between mb-4 p-2 border-b">
+      <button
+        onClick={() => formatCells('left')}
+        className="border p-2"
+      >
+        Align Left
+      </button>
+      <button
+        onClick={() => formatCells('center')}
+        className="border p-2"
+      >
+        Align Center
+      </button>
+      <button
+        onClick={() => formatCells('right')}
+        className="border p-2"
+      >
+        Align Right
+      </button>
+      <button
+        onClick={() => formatCells('increaseFont')}
+        className="border p-2"
+      >
+        Increase Font
+      </button>
+      <button
+        onClick={() => formatCells('decreaseFont')}
+        className="border p-2"
+      >
+        Decrease Font
+      </button>
+    </div>
+  );
+};
+
+export default Toolbar;
+// store/useSpreadsheetStore.js
+import create from 'zustand';
+
+const useSpreadsheetStore = create((set) => ({
+  cells: Array(1000).fill({ content: '', style: {} }),
+  updateCell: (index, value) =>
+    set((state) => {
+      const newCells = [...state.cells];
+      newCells[index] = { ...newCells[index], content: value };
+      return { cells: newCells };
+    }),
+  formatCells: (action) =>
+    set((state) => {
+      const newCells = state.cells.map((cell) => {
+        const newStyle = { ...cell.style };
+        switch (action) {
+          case 'left':
+            newStyle.textAlign = 'left';
+            break;
+          case 'center':
+            newStyle.textAlign = 'center';
+            break;
+          case 'right':
+            newStyle.textAlign = 'right';
+            break;
+          case 'increaseFont':
+            newStyle.fontSize = (parseInt(newStyle.fontSize || 14) + 2) + 'px';
+            break;
+          case 'decreaseFont':
+            newStyle.fontSize = (parseInt(newStyle.fontSize || 14) - 2) + 'px';
+            break;
+          default:
+            break;
+        }
+        return { ...cell, style: newStyle };
+      });
+      return { cells: newCells };
+    }),
+}));
+
+export default useSpreadsheetStore;
+// components/Grid.js
+import React from 'react';
+import useSpreadsheetStore from '../store/useSpreadsheetStore';
+
+const Grid = () => {
+  const { cells, updateCell } = useSpreadsheetStore();
+
+  return (
+    <div className="grid grid-cols-10 gap-1 p-2 border border-gray-300">
+      {cells.map((cell, index) => (
+        <div key={index} className="border border-gray-400 p-2">
+          <input
+            type="text"
+            value={cell.content}
+            onChange={(e) => updateCell(index, e.target.value)}
+            style={cell.style}
+            className="w-full outline-none"
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Grid;
+// pages/index.js
+import Head from 'next/head';
+import Grid from '../components/Grid';
+import Toolbar from '../components/Toolbar';
+
+export default function Home() {
+  return (
+    <div>
+      <Head>
+        <title>Spreadsheet App</title>
+        <meta name="description" content="A simple spreadsheet app using Next.js and Tailwind CSS" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <main className="flex flex-col items-center justify-center min-h-screen p-4">
+        <h1 className="text-4xl font-bold mb-4">Spreadsheet App</h1>
+        <Toolbar />
+        <Grid />
+      </main>
+    </div>
+  );
+}
+// components/Search.js
+import React, { useState } from 'react';
+import useSpreadsheetStore from '../store/useSpreadsheetStore';
+
+const Search = () => {
+  const { cells } = useSpreadsheetStore();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredCells = cells.filter((cell) => cell.content.includes(searchTerm));
+
+  return (
+    <div
