@@ -1,0 +1,8 @@
+npx create-next-app@latest spreadsheet-app
+cd spreadsheet-app
+npm install tailwindcss zustand
+npx tailwindcss init
+npx create-next-app@latest spreadsheet-app
+cd spreadsheet-app
+npm install tailwindcss zustand
+npx tailwindcss init
